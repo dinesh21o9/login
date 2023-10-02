@@ -121,7 +121,7 @@ switch($method){
                             "user_name" => $user['name']
                         );
                         
-                        $jwt = JWT::encode($payload, $key, $alg);
+                        // $jwt = JWT::encode($payload, $key, $alg);
 
 
                         // Able to set Cookie,but not able to access it. so passing jwt varible as response.
@@ -144,7 +144,8 @@ switch($method){
                         // echo json_encode(array("jwt" => $jwt));
 
                         //Sending jwt as response as im not able to access the cookie that i saved (NOT ABLE TO ACCESS IT IN LINE 165)
-                        $response = ['status' => 1, 'message' => 'Logged in successfully', 'token'=> $jwt];
+                        // $response = ['status' => 1, 'message' => 'Logged in successfully', 'token'=> $jwt];
+                        $response = ['status' => 1, 'message' => 'Logged in successfully'];
 
                     } else {
                         // Incorrect password
