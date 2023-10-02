@@ -1,16 +1,16 @@
-# Use an official PHP 8.2.4 image with Apache
+# Use an official PHP 8.2.4 image as the base image
 FROM php:8.2.4-apache
 
 # Set the working directory in the container
 WORKDIR /var/www/html
 
-# Copy the application code into the container
+# Copy your PHP application files to the container
 COPY . /var/www/html
 
 # Install PHP extensions and Composer
 RUN apt-get update && \
     apt-get install -y libpq-dev && \
-    docker-php-ext-install pdo pdo_mysql pdo_pgsql && \
+    docker-php-ext-install pdo pdo_mysql pdo_pgsql mysqli && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install Composer dependencies
