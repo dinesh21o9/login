@@ -155,11 +155,30 @@ switch($method){
                     // User not found
                     $response = ['status' => 0, 'message' => 'User not found'];
                 }
+        }
+        else if($data->page == 'viewProp'){
+
+            $mysqli = require __DIR__ . "/database.php";
+            $target = $data->prop_id;
+            if($data->offer == 'sale'){
+                $stmt = $mysqli->prepare("SELECT * FROM properties_db_sale WHERE prop_id = ?");
             }
-            echo json_encode($response);
-            $mysqli->close();
-        
+            else if($data->offer == 'rent'){
+                $stmt = $mysqli->prepare("SELECT * FROM properties_db_rent WHERE prop_id = ?");
+            }
+            $stmt->bind_param("i", $target);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $data = $result->fetch_assoc();
+            $stmt->close();
+          
+            echo json_encode($data);        
             break;
+        }              
+        // echo json_encode($response);
+        $mysqli->close();
+        
+        break;
     case 'GET':
         $mysqli = require __DIR__ . "/database.php";
         
