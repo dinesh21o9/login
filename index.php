@@ -175,7 +175,7 @@ switch($method){
             echo json_encode($data);        
             break;
         }              
-        // echo json_encode($response);
+        echo json_encode($response);
         $mysqli->close();
         
         break;
