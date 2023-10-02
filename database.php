@@ -1,9 +1,9 @@
 <?php
 
-$host = "localhost";
-$dbname = "growth_craft";
-$username = "root";
-$password = "";
+$host = "dpg-ckdh784gonuc73bu1usg-a";
+$dbname = "homeseekrdb";
+$username = "homeseekrdb_user";
+$password = "RyI6dsrMpCSKUbN5PZ4bCqHEIYIMguOf";
 
 $mysqli = new mysqli(hostname: $host,
                      username: $username,
