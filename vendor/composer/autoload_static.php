@@ -17,6 +17,7 @@ class ComposerStaticInit39adc1d96bdebff08e9273207c334e85
         'Firebase\\JWT\\' => 
         array (
             0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
+            1 => __DIR__ . '/..' . '/firebase/php-jwt/src',
         ),
     );
 

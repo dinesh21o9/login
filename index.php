@@ -6,8 +6,8 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 require_once 'database.php';
 require 'vendor/autoload.php';
-use \Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+use Firebase\JWT\JWT;
+// use Firebase\JWT\Key;
 
 $key = "Dinesh_Work";
 $alg ='HS256';
@@ -126,9 +126,9 @@ switch($method){
 
                         // Able to set Cookie,but not able to access it. so passing jwt varible as response.
 
-                        setcookie('jwtToken', $jwt, time()+3600, '/', 'http://localhost://3000', false, true); //This is working, only code to set a cookie. below you can find alternate ways to set a cookie.
+                        // setcookie('jwtToken', $jwt, time()+3600, '/', 'http://localhost://3000', false, true); //This is working, only code to set a cookie. below you can find alternate ways to set a cookie.
 
-                        $_COOKIE['jwtToken'] = $jwt;
+                        // $_COOKIE['jwtToken'] = $jwt;
 
                         // if(isset($_COOKIE['jwtToken'])) {
                         //     // Access the cookie value
