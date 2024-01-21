@@ -6,8 +6,9 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 require_once 'database.php';
 require 'vendor/autoload.php';
+
 use Firebase\JWT\JWT;
-// use Firebase\JWT\Key;
+use Firebase\JWT\Key;
 
 $key = "Dinesh_Work";
 $alg ='HS256';
@@ -121,7 +122,7 @@ switch($method){
                             "user_name" => $user['name']
                         );
                         
-                        // $jwt = JWT::encode($payload, $key, $alg);
+                        $jwt = JWT::encode($payload, $key, $alg);
 
 
                         // Able to set Cookie,but not able to access it. so passing jwt varible as response.
@@ -144,8 +145,8 @@ switch($method){
                         // echo json_encode(array("jwt" => $jwt));
 
                         //Sending jwt as response as im not able to access the cookie that i saved (NOT ABLE TO ACCESS IT IN LINE 165)
-                        // $response = ['status' => 1, 'message' => 'Logged in successfully', 'token'=> $jwt];
-                        $response = ['status' => 1, 'message' => 'Logged in successfully'];
+                        // $response = ['status' => 1, 'message' => 'Logged in successfully'];
+                        $response = ['status' => 1, 'message' => 'Logged in successfully', 'token'=> $jwt];
 
                     } else {
                         // Incorrect password
@@ -174,7 +175,208 @@ switch($method){
           
             echo json_encode($data);        
             break;
-        }              
+        }
+        else if ($data->page == 'post') {
+            $jwt = $data->cookie;
+            try {
+                $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
+            } catch (Exception $e) {
+
+                // Token verification failed, handle error
+                $response = ['status' => 0, 'message' => 'Token verification failed. Please log in again.', 'error' => $e->getMessage()];
+                echo json_encode($response);
+                exit;
+            }
+            $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
+            $user_id = $decoded->user_id;
+            $user_name = $decoded->user_name;
+            // Posting Sale properties:
+            if ($data->offer === "sale") {
+                $sql = "INSERT INTO properties_db_sale (
+                        user_id,
+                        user_name,
+                        address,
+                        age,
+                        balcony,
+                        bathroom,
+                        bedroom,
+                        bhk,
+                        carpet,
+                        deposit,
+                        description,
+                        furnished,
+                        garden,
+                        gym,
+                        hospital,
+                        lift,
+                        loan,
+                        market_area,
+                        status,
+                        total_floors,
+                        type,
+                        water_supply,
+                        offer,
+                        parking_area,
+                        play_ground,
+                        power_backup,
+                        price,
+                        property_name,
+                        room_floor,
+                        school,
+                        security_guard,
+                        shopping_mall
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                $stmt = $mysqli->stmt_init();
+                if (!$stmt->prepare($sql)) {
+                    die("SQL error: " . $mysqli->error);
+                }
+
+                $stmt->bind_param(
+                    "isssiiiiisssssssssssssssssssssss",
+                    $user_id,
+                    $user_name,
+                    $data->address,
+                    $data->age,
+                    $data->balcony,
+                    $data->bathroom,
+                    $data->bedroom,
+                    $data->bhk,
+                    $data->carpet,
+                    $data->deposit,
+                    $data->description,
+                    $data->furnished,
+                    $data->garden,
+                    $data->gym,
+                    $data->hospital,
+                    $data->lift,
+                    $data->loan,
+                    $data->market_area,
+                    $data->status,
+                    $data->total_floors,
+                    $data->type,
+                    $data->water_supply,
+                    $data->offer,
+                    $data->parking_area,
+                    $data->play_ground,
+                    $data->power_backup,
+                    $data->price,
+                    $data->property_name,
+                    $data->room_floor,
+                    $data->school,
+                    $data->security_guard,
+                    $data->shopping_mall
+                );
+
+                if ($stmt->execute()) {
+                    $response = ['status' => 1, 'message' => 'Uploaded property successfully.'];
+                } else {
+                    // if ($mysqli->errno === 1062) {
+                    //     $response = ['status'=> 0,'message'=> 'Data already sent!'];
+                    // } 
+                    // else if($mysqli->error) {
+                    //     $response= ['status' => $mysqli->error , 'message'=> 'Error in mysqli! open index.php'];
+                    // }
+                    // else{
+                    $response = ['status' => 0, 'message' => 'Failed to create record.'];
+                    // }
+                }
+            }
+            //Posting Rent properties:
+            if ($data->offer === "rent") {
+                $sql = "INSERT INTO properties_db_rent (
+                        user_id,
+                        user_name,
+                        address,
+                        age,
+                        balcony,
+                        bathroom,
+                        bedroom,
+                        bhk,
+                        carpet,
+                        security_deposit,  
+                        description,
+                        furnished,
+                        garden,
+                        gym,
+                        hospital,
+                        lift,
+                        market_area,
+                        status,
+                        total_floors,
+                        type,
+                        water_supply,
+                        offer,
+                        parking_area,
+                        play_ground,
+                        power_backup,
+                        rent,         
+                        property_name,
+                        room_floor,
+                        school,
+                        security_guard,
+                        shopping_mall
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                $stmt = $mysqli->stmt_init();
+                if (!$stmt->prepare($sql)) {
+                    die("SQL error: " . $mysqli->error);
+                }
+
+                $stmt->bind_param(
+                    "isssiiiiissssssssssssssssssssss",
+                    $user_id,
+                    $user_name,
+                    $data->address,
+                    $data->age,
+                    $data->balcony,
+                    $data->bathroom,
+                    $data->bedroom,
+                    $data->bhk,
+                    $data->carpet,
+                    $data->security_deposit,
+                    $data->description,
+                    $data->furnished,
+                    $data->garden,
+                    $data->gym,
+                    $data->hospital,
+                    $data->lift,
+                    $data->market_area,
+                    $data->status,
+                    $data->total_floors,
+                    $data->type,
+                    $data->water_supply,
+                    $data->offer,
+                    $data->parking_area,
+                    $data->play_ground,
+                    $data->power_backup,
+                    $data->rent,
+                    $data->property_name,
+                    $data->room_floor,
+                    $data->school,
+                    $data->security_guard,
+                    $data->shopping_mall
+                );
+
+                if ($stmt->execute()) {
+                    $response = ['status' => 1, 'message' => 'Uploaded property successfully.'];
+                } else {
+                    // if ($mysqli->errno === 1062) {
+                    //     $response = ['status'=> 0,'message'=> 'Data already sent!'];
+                    // } 
+                    // else if($mysqli->error) {
+                    //     $response= ['status' => $mysqli->error , 'message'=> 'Error in mysqli! open index.php'];
+                    // }
+                    // else{
+                    $response = ['status' => 0, 'message' => 'Failed to create record.'];
+                    // }
+                }
+            }
+            
+            // echo json_encode($response);
+            // $mysqli->close();
+            // exit;
+        }           
         echo json_encode($response);
         $mysqli->close();
         
