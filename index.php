@@ -294,7 +294,7 @@ switch($method){
                         bedroom,
                         bhk,
                         carpet,
-                        security_deposit,  
+                        deposit,  
                         description,
                         furnished,
                         garden,
@@ -334,7 +334,7 @@ switch($method){
                     $data->bedroom,
                     $data->bhk,
                     $data->carpet,
-                    $data->security_deposit,
+                    $data->deposit,
                     $data->description,
                     $data->furnished,
                     $data->garden,
@@ -376,7 +376,10 @@ switch($method){
             // echo json_encode($response);
             // $mysqli->close();
             // exit;
-        }           
+        }
+        // else if($data->page == 'header'){
+
+        // } 
         echo json_encode($response);
         $mysqli->close();
         
