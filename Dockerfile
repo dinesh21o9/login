@@ -4,21 +4,26 @@ FROM php:8.2.4-apache
 # Set the working directory in the container
 WORKDIR /var/www/html
 
-# Copy your PHP application files to the container
-COPY . /var/www/html
-
-# Install PHP extensions and Composer
+# Install Git
 RUN apt-get update && \
-    apt-get install -y libpq-dev && \
-    docker-php-ext-install pdo pdo_mysql pdo_pgsql mysqli && \
-    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    apt-get install -y git
 
-# Install Composer dependencies
-RUN composer install
+# Copy only the composer files first to leverage Docker cache
+COPY composer.json composer.lock /var/www/html/
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install PHP extensions and Composer dependencies
+RUN apt-get install -y libpq-dev && \
+    docker-php-ext-install pdo pdo_mysql pdo_pgsql mysqli && \
+    composer install
 
 # Enable Apache modules and configure .htaccess (if needed)
 RUN a2enmod rewrite
-# COPY .htaccess /var/www/html/.htaccess
+
+# Copy the rest of the application
+COPY . /var/www/html
 
 # Expose port 80 for Apache
 EXPOSE 80
