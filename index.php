@@ -21,6 +21,8 @@ $data = json_decode($jsonData);
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+$mysqli = require __DIR__ . "/database.php";
+
 // print_r($data);
 // print_r($method);
 
@@ -28,15 +30,9 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
 
     case 'POST':
-
-        // Code for sign up and login
-
-        // USER SIGN-UP
         if ($data->page == "signup") {
             $password = $data->password;
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
-
-            $mysqli = require __DIR__ . "/database.php";
 
             $sql = "INSERT INTO users (name, email , password_hash)
                     VALUES (?, ?, ?)";
@@ -56,10 +52,8 @@ switch ($method) {
 
 
             if ($stmt->execute()) {
-
                 $response = ['status' => 1, 'message' => 'Record created successfully.'];
             } else {
-
                 if ($mysqli->errno === 1062) {
                     $response = ['status' => 0, 'message' => 'Email already taken'];
                 } else if ($mysqli->error) {
@@ -70,8 +64,6 @@ switch ($method) {
             }
         } else if ($data->page == "adminLogin") {
             //Admin login
-            $mysqli = require __DIR__ . "/database.php"; // Connecting to the database
-
             $sql = sprintf(
                 "SELECT * FROM admins 
                             WHERE email = '%s'",
@@ -157,8 +149,6 @@ switch ($method) {
                 $response = ['status' => 0, 'message' => 'User not found'];
             }
         } else if ($data->page == 'viewProp') {
-
-            $mysqli = require __DIR__ . "/database.php";
             $target = $data->prop_id;
             if ($data->offer == 'sale') {
                 $stmt = $mysqli->prepare("SELECT * FROM properties_db_sale WHERE prop_id = ?");
@@ -170,7 +160,6 @@ switch ($method) {
             $result = $stmt->get_result();
             $data = $result->fetch_assoc();
             $stmt->close();
-
             echo json_encode($data);
             break;
         } else if ($data->page == 'post') {
@@ -186,7 +175,6 @@ switch ($method) {
                 echo json_encode($response);
                 exit;
             }
-
             // Posting Sale properties:
             if ($data->offer === "sale") {
                 $sql = "INSERT INTO properties_db_sale (
@@ -369,34 +357,62 @@ switch ($method) {
                     // }
                 }
             }
+        } else if ($data->page == 'dashboard') {
+            if ($data->cookie) {
+                $jwt = $data->cookie;
+                try {
+                    $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
+                    $user_id = $decoded->user_id;
+                    $user_name = $decoded->user_name;
+                } catch (Exception $e) {
+                    // Token verification failed, handle error
+                    $response = ['status' => 0, 'message' => 'Token verification failed. Please log in again.', 'error' => $e->getMessage()];
+                    echo json_encode($response);
+                    exit;
+                }
+            }else{
+                $user_id = -1;
+            }
+            
+            $response = [];
 
-            // echo json_encode($response);
-            // $mysqli->close();
-            // exit;
+            $result = $mysqli->query("SELECT * FROM properties_db_sale WHERE admin_id != 0");
+            while ($row = $result->fetch_assoc()) {
+                if ($user_id === $row['user_id']) {
+                    $row['editAccess'] = true;
+                } else {
+                    $row['editAccess'] = false;
+                }
+                $response[] = $row;
+            }
+
+            $result = $mysqli->query("SELECT * FROM properties_db_rent WHERE admin_id != 0");
+            while ($row = $result->fetch_assoc()) {
+                if ($user_id === $row['user_id']) {
+                    $row['editAccess'] = true;
+                } else {
+                    $row['editAccess'] = false;
+                }
+                $response[] = $row;
+            }
+        } else if ($data->page == 'header') {
+            $jwt = $data->cookie;
+            try {
+                $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
+                $user_id = $decoded->user_id;
+                $user_name = $decoded->user_name;
+                $response = ['status' => 1, 'userName' => $user_name, 'message' => 'Fetched user name on JWT token'];
+            } catch (Exception $e) {
+                $response = ['status' => 0, 'message' => 'Token verification failed. Please log in again.', 'error' => $e->getMessage()];
+                echo json_encode($response);
+                exit;
+            }
         }
-        // else if($data->page == 'header'){
-
-        // } 
         echo json_encode($response);
         $mysqli->close();
-
         break;
+
     case 'GET':
-        $mysqli = require __DIR__ . "/database.php";
-
-        // $authorizationHeader = '';
-        // if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-        //     $authorizationHeader = $_SERVER['HTTP_AUTHORIZATION'];
-        // } elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
-        //     $authorizationHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
-        // }
-        // $jwt = '';
-
-        // if (strpos($authorizationHeader, 'Bearer') !== false) {
-        //     // Extract the token part by removing the 'Bearer ' prefix
-        //     $jwt = substr($authorizationHeader, 7);
-        // }
-
         // $jwt = $_COOKIE['jwtToken'];
         //Not able to access cookie that I saved
 
@@ -406,7 +422,6 @@ switch ($method) {
         $data = [];
 
         // if it is user 
-
         $result = $mysqli->query("SELECT * FROM properties_db_sale WHERE admin_id != 0");
         while ($row = $result->fetch_assoc()) {
             $data[] = $row;
@@ -417,7 +432,6 @@ switch ($method) {
         }
 
         // else if it is admin
-
         // $result = $mysqli->query("SELECT * FROM properties_db_sale WHERE admin_id = 0");
         // while ($row = $result->fetch_assoc()) {
         //     $data[] = $row;
@@ -428,5 +442,22 @@ switch ($method) {
         // }
 
         echo json_encode($data);
+        $mysqli->close();
+        break;
+
+    case 'DELETE':
+        $prop_id = $_GET['prop_id'];
+
+        $sql_sale = "DELETE FROM properties_db_sale WHERE prop_id = $prop_id";
+        $sql_rent = "DELETE FROM properties_db_rent WHERE prop_id = $prop_id";
+
+        if ($mysqli->query($sql_rent) | $mysqli->query($sql_sale) === TRUE) {
+            $response = ['status' => 1, 'message' => 'Property deleted successfully'];
+        } else {
+            $response = ['status' => 0, 'message' => 'Error deleting property: ' . $mysqli->error];
+        }
+
+        echo json_encode($response);
+        $mysqli->close();
         break;
 }
