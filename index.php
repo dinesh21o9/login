@@ -160,6 +160,7 @@ switch ($method) {
             $result = $stmt->get_result();
             $data = $result->fetch_assoc();
             $stmt->close();
+            $mysqli->close();
             echo json_encode($data);
             break;
         } else if ($data->page == 'post') {
