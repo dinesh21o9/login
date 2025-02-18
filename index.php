@@ -13,10 +13,10 @@ use Firebase\JWT\Key;
 $key = "Dinesh_Work";
 $alg = 'HS256';
 
-// Retrieve the raw JSON data from the request
+
 $jsonData = file_get_contents('php://input');
 
-// Decode the JSON data into a PHP object or array
+
 $data = json_decode($jsonData);
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -85,9 +85,6 @@ switch ($method) {
 
                     $jwt = JWT::encode($payload, $key, $alg);
 
-                    // setcookie('jwtToken', $jwt, time()+3600, '/', 'http://localhost://3000', false, true); //This is working,this is only code to set a cookie. go to line 129 to understand more 
-
-
                     $response = ['status' => 1, 'message' => 'Logged in successfully', 'token' => $jwt];
                 } else {
                     // Incorrect password
@@ -117,28 +114,6 @@ switch ($method) {
 
                     $jwt = JWT::encode($payload, $key, $alg);
 
-
-                    // Able to set Cookie,but not able to access it. so passing jwt varible as response.
-
-                    // setcookie('jwtToken', $jwt, time()+3600, '/', 'http://localhost://3000', false, true); //This is working, only code to set a cookie. below you can find alternate ways to set a cookie.
-
-                    // $_COOKIE['jwtToken'] = $jwt;
-
-                    // if(isset($_COOKIE['jwtToken'])) {
-                    //     // Access the cookie value
-                    //     $jwtToken = $_COOKIE['jwtToken'];
-
-                    //     // Use the JWT token as needed
-                    //     // ...
-                    // } else {
-                    //     // Cookie is not set or expired
-                    //     // Handle the case when the cookie is not available
-                    //     $jwtToken = 'cookie not set';
-                    // }
-                    // echo json_encode(array("jwt" => $jwt));
-
-                    //Sending jwt as response as im not able to access the cookie that i saved (NOT ABLE TO ACCESS IT IN LINE 165)
-                    // $response = ['status' => 1, 'message' => 'Logged in successfully'];
                     $response = ['status' => 1, 'message' => 'Logged in successfully', 'token' => $jwt];
                 } else {
                     // Incorrect password
@@ -257,15 +232,7 @@ switch ($method) {
                 if ($stmt->execute()) {
                     $response = ['status' => 1, 'message' => 'Uploaded property successfully.'];
                 } else {
-                    // if ($mysqli->errno === 1062) {
-                    //     $response = ['status'=> 0,'message'=> 'Data already sent!'];
-                    // } 
-                    // else if($mysqli->error) {
-                    //     $response= ['status' => $mysqli->error , 'message'=> 'Error in mysqli! open index.php'];
-                    // }
-                    // else{
                     $response = ['status' => 0, 'message' => 'Failed to create record.'];
-                    // }
                 }
             }
             //Posting Rent properties:
@@ -347,15 +314,7 @@ switch ($method) {
                 if ($stmt->execute()) {
                     $response = ['status' => 1, 'message' => 'Uploaded property successfully.'];
                 } else {
-                    // if ($mysqli->errno === 1062) {
-                    //     $response = ['status'=> 0,'message'=> 'Data already sent!'];
-                    // } 
-                    // else if($mysqli->error) {
-                    //     $response= ['status' => $mysqli->error , 'message'=> 'Error in mysqli! open index.php'];
-                    // }
-                    // else{
                     $response = ['status' => 0, 'message' => 'Failed to create record.'];
-                    // }
                 }
             }
         } else if ($data->page == 'dashboard') {
@@ -414,15 +373,9 @@ switch ($method) {
         break;
 
     case 'GET':
-        // $jwt = $_COOKIE['jwtToken'];
-        //Not able to access cookie that I saved
-
-        //code to decode jwt
-        // $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
 
         $data = [];
 
-        // if it is user 
         $result = $mysqli->query("SELECT * FROM properties_db_sale WHERE admin_id != 0");
         while ($row = $result->fetch_assoc()) {
             $data[] = $row;
@@ -431,17 +384,6 @@ switch ($method) {
         while ($row = $result->fetch_assoc()) {
             $data[] = $row;
         }
-
-        // else if it is admin
-        // $result = $mysqli->query("SELECT * FROM properties_db_sale WHERE admin_id = 0");
-        // while ($row = $result->fetch_assoc()) {
-        //     $data[] = $row;
-        // }
-        // $result = $mysqli->query("SELECT * FROM properties_db_rent WHERE admin_id = 0");
-        // while ($row = $result->fetch_assoc()) {
-        //     $data[] = $row;
-        // }
-
         echo json_encode($data);
         $mysqli->close();
         break;

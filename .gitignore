@@ -1,0 +1,10 @@
+# Ignore sensitive files
+database.php
+.env
+
+# Ignore dependencies
+vendor/
+
+# Ignore system files
+*.log
+*.cache
