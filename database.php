@@ -1,6 +1,7 @@
 <?php
 
-$dotenvPath = __DIR__ . "/.env";
+// $dotenvPath = __DIR__ . "/.env";
+$dotenvPath = "/etc/secrets/.env";
 
 if (!file_exists($dotenvPath)) {
     die("Error: .env file not found at " . $dotenvPath);
