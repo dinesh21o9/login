@@ -10,6 +10,7 @@ RUN apt-get update && \
 
 # Copy only the composer files first to leverage Docker cache
 COPY composer.json composer.lock /var/www/html/
+COPY .env /var/www/html/.env
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
